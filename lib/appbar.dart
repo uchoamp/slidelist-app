@@ -13,13 +13,8 @@ class SlideListAppBar extends StatelessWidget implements PreferredSizeWidget {
     return SafeArea(
         child: Container(
             decoration: BoxDecoration(
-                color: SlideListColors.background,
-                boxShadow: [
-                  BoxShadow(
-                      color: SlideListColors.shadow,
-                      spreadRadius: 3.0,
-                      blurRadius: 6)
-                ]),
+              color: SlideListColors.background,
+            ),
             width: double.infinity,
             height: 90,
             child: Center(

@@ -7,6 +7,7 @@ class SlideList extends InheritedWidget {
   late List<cd.Card> cards;
   cd.Card? activeCard;
   Select_? selectState;
+  Function()? setFocusActiveCard;
 
   SlideList({required List<cd.Card> cards, Key? key, required Widget child})
       : super(child: child, key: key) {

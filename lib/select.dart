@@ -78,7 +78,7 @@ class Select_ extends State<Select> {
           color: SlideListColors.select,
           child: InkWell(
               onTap: toggleDropdown,
-              onLongPress: card.currentState?.focusNode.requestFocus,
+              onLongPress: slidelist.setFocusActiveCard,
               child: Container(
                 width: 260,
                 padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),

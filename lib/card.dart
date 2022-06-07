@@ -4,7 +4,6 @@ import 'slidelist.dart';
 
 class Card extends StatefulWidget {
   late String name;
-  _Card? currentState;
   Card({Key? key, required String name}) : super(key: key) {
     this.name = name;
   }
@@ -50,8 +49,15 @@ class _Card extends State<Card> {
   @override
   Widget build(BuildContext context) {
     var slidelist = SlideList.of(context);
-    widget.currentState = this;
-    _controller.value = _controller.value.copyWith(text: widget.name);
+    _controller.value = _controller.value.copyWith(
+      text: widget.name,
+      selection: TextSelection(
+          baseOffset: widget.name.length, extentOffset: widget.name.length),
+      composing: TextRange.empty,
+    );
+    if (slidelist.activeCard == widget) {
+      slidelist.setFocusActiveCard = () => focusNode.requestFocus();
+    }
     return Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         width: double.infinity,
