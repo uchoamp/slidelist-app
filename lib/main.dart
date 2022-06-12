@@ -1,6 +1,8 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:slidelist_app/models/card.dart';
+import 'package:slidelist_app/models/item.dart';
 import 'package:slidelist_app/widgets/appbar.dart';
 import 'package:slidelist_app/widgets/itemlist.dart';
 import 'package:slidelist_app/widgets/navbar.dart';
@@ -17,6 +19,9 @@ class RootWidget extends StatelessWidget {
     var slidelist = SlideListModel();
     slidelist.cards.add(CardModel("Default", false, []));
     slidelist.cards.add(CardModel("Other", false, []));
+    var card = slidelist.cards.first;
+    card.items.add(ItemModel("Teste 1", false));
+    card.items.add(ItemModel("Teste 2", false));
     return ChangeNotifierProvider(
         create: (context) => slidelist,
         child: MaterialApp(
@@ -44,17 +49,34 @@ class _SlideListAppState extends State<SlideListApp> {
   Widget build(BuildContext context) {
     var slidelist = context.read<SlideListModel>();
     return GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: const SlideListAppBar(),
-            body: GestureDetector(
-                onHorizontalDragStart: slidelist.setDragConfirmed,
-                child: Column(children: const [
-                  Navbar(),
-                  Expanded(
-                    child: ItemList(),
-                  )
-                ]))));
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+          appBar: const SlideListAppBar(),
+          body: RawGestureDetector(
+              gestures: <Type, GestureRecognizerFactory>{
+                AlwaysAcceptHorizontalDragGestureRecognizer:
+                    GestureRecognizerFactoryWithHandlers<
+                            AlwaysAcceptHorizontalDragGestureRecognizer>(
+                        () => AlwaysAcceptHorizontalDragGestureRecognizer(),
+                        (AlwaysAcceptHorizontalDragGestureRecognizer instance) {
+                  instance.minFlingDistance = 50;
+                  instance.onEnd = slidelist.setDragConfirmed;
+                }),
+              },
+              child: Column(children: const [
+                Navbar(),
+                Expanded(
+                  child: ItemList(),
+                )
+              ]))),
+    );
+  }
+}
+
+class AlwaysAcceptHorizontalDragGestureRecognizer
+    extends HorizontalDragGestureRecognizer {
+  @override
+  void rejectGesture(int pointer) {
+    acceptGesture(pointer);
   }
 }

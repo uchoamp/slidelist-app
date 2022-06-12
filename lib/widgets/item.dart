@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:slidelist_app/common/colors.dart';
 import 'package:slidelist_app/models/item.dart';
+import 'package:provider/provider.dart';
+import 'package:slidelist_app/models/slidelist.dart';
 
 class ItemWidget extends StatefulWidget {
   final ItemModel item;
@@ -17,17 +19,17 @@ class _ItemWidget extends State<ItemWidget> {
   @override
   void initState() {
     super.initState();
-    // _focusNode.addListener(() {
-    //   var slidelist = SlideList.of(context);
-    //   var newValue = _controller.text;
-    //   if (!_focusNode.hasFocus) {
-    //     if (newValue.replaceAll(RegExp(r'\s'), "").isEmpty) {
-    //       slidelist.deleteItem(widget);
-    //     } else if (newValue != widget.value) {
-    //       slidelist.updateItem(widget, newValue);
-    //     }
-    //   }
-    // });
+    _focusNode.addListener(() {
+      var slidelist = context.read<SlideListModel>();
+      var newValue = _controller.text;
+      if (!_focusNode.hasFocus) {
+        if (newValue.replaceAll(RegExp(r'\s'), "").isEmpty) {
+          slidelist.deleteItem(widget.item);
+        } else if (newValue != widget.item.value) {
+          slidelist.updateItemValue(newValue, widget.item);
+        }
+      }
+    });
   }
 
   @override
@@ -36,26 +38,20 @@ class _ItemWidget extends State<ItemWidget> {
     _controller.dispose();
   }
 
-  // void updateConfirmed(DismissDirection _) {
-  //   var slidelist = SlideList.of(context);
-  //   slidelist.updateItemConfirmed(widget);
-  //   slidelist.updateSlidelistState();
-  // }
-
-  void updateList(DismissDirection _) {}
-
   @override
   Widget build(BuildContext context) {
+    var slidelist = context.read<SlideListModel>();
     _controller.value = _controller.value.copyWith(
         text: widget.item.value,
         selection: TextSelection(
             baseOffset: widget.item.value.length,
             extentOffset: widget.item.value.length));
     return Dismissible(
-        onUpdate: (DismissUpdateDetails _) {},
-        // onDismissed: updateConfirmed,
-        resizeDuration: const Duration(milliseconds: 30),
-        movementDuration: const Duration(milliseconds: 1),
+        onDismissed: (DismissDirection _) {
+          slidelist.toggleItemSide(widget.item);
+        },
+        resizeDuration: const Duration(milliseconds: 300),
+        movementDuration: const Duration(milliseconds: 200),
         key: Key(widget.item.value),
         direction: widget.item.confirmed
             ? DismissDirection.endToStart
@@ -93,7 +89,10 @@ class _ItemWidget extends State<ItemWidget> {
                   ),
                   Expanded(
                     child: AbsorbPointer(
+                      absorbing: !_focusNode.hasFocus,
                       child: TextField(
+                          scrollPadding:
+                              const EdgeInsets.symmetric(vertical: 34),
                           cursorColor: Colors.white10,
                           focusNode: _focusNode,
                           controller: _controller,

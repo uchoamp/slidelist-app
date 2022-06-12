@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:slidelist_app/models/card.dart';
 import 'package:collection/collection.dart';
+import 'package:slidelist_app/models/item.dart';
 import 'package:slidelist_app/widgets/card.dart';
 import 'package:slidelist_app/widgets/item.dart';
 
 class SlideListModel extends ChangeNotifier {
   final List<CardModel> cards = [];
   final List<CardWidget> cardsWidget = [];
-
-  CardModel? _activeCard;
-
   CardModel get activeCard {
     _activeCard ??= cards.first;
     return _activeCard!;
+  }
+
+  CardModel? _activeCard;
+  bool get hasItemConfirmed => activeCard.items.any((i) => i.confirmed);
+
+  SlideListModel() : super() {
+    addListener(() {
+      if (!hasItemConfirmed && activeCard.confirmed) {
+        setNotConfirmed();
+      }
+    });
   }
 
   List<ItemWidget> get currentItems => activeCard.items
@@ -24,27 +33,6 @@ class SlideListModel extends ChangeNotifier {
     cardsWidget.clear();
     cardsWidget.addAll(
         cards.where((c) => c != activeCard).map((c) => CardWidget(c, null)));
-  }
-
-  void setDragConfirmed(DragStartDetails dragDetails) {
-    if (activeCard.confirmed && dragDetails.globalPosition.direction > 1) {
-      activeCard.confirmed = true;
-      notifyListeners();
-    } else if (!activeCard.confirmed &&
-        dragDetails.globalPosition.direction <= 1) {
-      activeCard.confirmed = false;
-      notifyListeners();
-    }
-  }
-
-  void setConfirmed() {
-    activeCard.confirmed = true;
-    notifyListeners();
-  }
-
-  void setNotConfirmed() {
-    activeCard.confirmed = false;
-    notifyListeners();
   }
 
   void setActiveCard(CardModel card) {
@@ -95,5 +83,54 @@ class SlideListModel extends ChangeNotifier {
     for (var item in activeCard.items) {
       item.confirmed = false;
     }
+    activeCard.confirmed = false;
+    notifyListeners();
+  }
+
+  void setDragConfirmed(DragEndDetails details) {
+    if (activeCard.confirmed && details.velocity.pixelsPerSecond.dx > 0) {
+      activeCard.confirmed = false;
+      notifyListeners();
+    } else if (!activeCard.confirmed &&
+        details.velocity.pixelsPerSecond.dx < 0 &&
+        hasItemConfirmed) {
+      activeCard.confirmed = true;
+      notifyListeners();
+    }
+  }
+
+  void setConfirmed() {
+    activeCard.confirmed = true;
+    notifyListeners();
+  }
+
+  void setNotConfirmed() {
+    activeCard.confirmed = false;
+    notifyListeners();
+  }
+
+  void updateItemValue(String value, ItemModel item) {
+    if (!activeCard.items.any((i) => i.value == value && i != item)) {
+      item.value = value;
+    }
+  }
+
+  void deleteItem(ItemModel item) {
+    activeCard.items.remove(item);
+    notifyListeners();
+  }
+
+  void toggleItemSide(ItemModel item) {
+    item.confirmed = !item.confirmed;
+    notifyListeners();
+  }
+
+  void addItem(String value) {
+    if (activeCard.items.any((i) => i.value == value)) return;
+    activeCard.items.add(ItemModel(value, false));
+  }
+
+  void notifyOnDimissed() {
+    notifyListeners();
   }
 }

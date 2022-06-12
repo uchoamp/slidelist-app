@@ -10,10 +10,17 @@ class ItemList extends StatefulWidget {
 
 class _ItemList extends State<ItemList> {
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<SlideListModel>(
       builder: (context, slidelist, child) {
         return ListView(
+          key: UniqueKey(), // Dimissible not works correctly without this
+          padding: const EdgeInsets.only(top: 8, bottom: 8),
           children: slidelist.currentItems,
         );
       },

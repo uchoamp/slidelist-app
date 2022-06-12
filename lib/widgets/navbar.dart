@@ -54,7 +54,8 @@ class _Navbar extends State<Navbar> {
                         const RoundedRectangleBorder(
                       borderRadius: BorderRadius.zero,
                     ))),
-                onPressed: slidelist.activeCard.confirmed
+                onPressed: slidelist.activeCard.confirmed ||
+                        !slidelist.hasItemConfirmed
                     ? null
                     : slidelist.setConfirmed,
                 child: const Text(
