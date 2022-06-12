@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:slidelist_app/appbar.dart';
-import 'colors.dart';
-import 'slidelist.dart';
-import 'card.dart' as cd;
+import 'package:provider/provider.dart';
+import 'package:slidelist_app/models/card.dart';
+import 'package:slidelist_app/widgets/appbar.dart';
+import 'package:slidelist_app/widgets/itemlist.dart';
+import 'package:slidelist_app/widgets/navbar.dart';
+import 'common/colors.dart';
+import 'models/slidelist.dart';
 
 void main() => runApp(const RootWidget());
 
@@ -11,17 +14,15 @@ class RootWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SlideList(
-        cards: [
-          cd.Card(name: 'Teste 1'),
-          cd.Card(name: 'Teste 2'),
-          cd.Card(
-            name: 'Teste 3',
-          )
-        ],
+    var slidelist = SlideListModel();
+    slidelist.cards.add(CardModel("Default", false, []));
+    slidelist.cards.add(CardModel("Other", false, []));
+    return ChangeNotifierProvider(
+        create: (context) => slidelist,
         child: MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
+              fontFamily: 'Roboto',
               brightness: Brightness.dark,
               scaffoldBackgroundColor: SlideListColors.background),
           home: const SlideListApp(title: 'Flutter Demo Home Page'),
@@ -41,13 +42,19 @@ class SlideListApp extends StatefulWidget {
 class _SlideListAppState extends State<SlideListApp> {
   @override
   Widget build(BuildContext context) {
+    var slidelist = context.read<SlideListModel>();
     return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: const Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: SlideListAppBar(),
-        body: Center(child: Text('Hello World!')),
-      ),
-    );
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: const SlideListAppBar(),
+            body: GestureDetector(
+                onHorizontalDragStart: slidelist.setDragConfirmed,
+                child: Column(children: const [
+                  Navbar(),
+                  Expanded(
+                    child: ItemList(),
+                  )
+                ]))));
   }
 }

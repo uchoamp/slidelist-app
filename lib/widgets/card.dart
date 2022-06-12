@@ -1,33 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:slidelist_app/colors.dart';
-import 'slidelist.dart';
+import 'package:slidelist_app/common/colors.dart';
+import 'package:slidelist_app/models/card.dart';
+import 'package:slidelist_app/models/slidelist.dart';
+import 'package:provider/provider.dart';
 
-class Card extends StatefulWidget {
-  late String name;
-  Card({Key? key, required String name}) : super(key: key) {
-    this.name = name;
-  }
+class CardWidget extends StatefulWidget {
+  final CardModel card;
+  final FocusNode? focusNode;
+
+  const CardWidget(this.card, this.focusNode, {Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _Card();
+  State<StatefulWidget> createState() => _CardWidget();
 }
 
-class _Card extends State<Card> {
+class _CardWidget extends State<CardWidget> {
   final TextEditingController _controller = TextEditingController();
-  final FocusNode focusNode = FocusNode();
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-    focusNode.addListener(() {
-      var slidelist = SlideList.of(context);
-      var newName = _controller.text;
-      if (!focusNode.hasFocus) {
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        var slidelist = context.read<SlideListModel>();
+        var newName = _controller.text;
         if (newName.replaceAll(RegExp(r'\s'), "").isEmpty) {
-          slidelist.deleteCard(widget);
-        } else if (newName != widget.name) {
-          widget.name = newName;
+          slidelist.deleteCard(widget.card);
+        } else if (newName != widget.card.name) {
+          slidelist.updateCard(newName, widget.card);
         }
+        FocusScope.of(context).unfocus();
       }
     });
   }
@@ -40,39 +44,42 @@ class _Card extends State<Card> {
 
   void setCardActive() {
     FocusScope.of(context).unfocus();
-    var slidelist = SlideList.of(context);
-    if (slidelist.activeCard == widget) return;
-    slidelist.activeCard = widget;
-    slidelist.selectState?.toggleDropdown();
+    var slidelist = context.read<SlideListModel>();
+    if (slidelist.activeCard == widget.card) return;
+    slidelist.setActiveCard(widget.card);
+  }
+
+  void setFocusEdit() {
+    setState(() {
+      _focusNode.requestFocus();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    var slidelist = SlideList.of(context);
     _controller.value = _controller.value.copyWith(
-      text: widget.name,
+      text: widget.card.name,
       selection: TextSelection(
-          baseOffset: widget.name.length, extentOffset: widget.name.length),
+          baseOffset: widget.card.name.length,
+          extentOffset: widget.card.name.length),
       composing: TextRange.empty,
     );
-    if (slidelist.activeCard == widget) {
-      slidelist.setFocusActiveCard = () => focusNode.requestFocus();
-    }
+
     return Container(
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         width: double.infinity,
         child: InkWell(
           highlightColor: Colors.transparent,
-          onTap: slidelist.activeCard == widget
-              ? slidelist.selectState?.toggleDropdown
-              : setCardActive,
-          onLongPress: focusNode.requestFocus,
+          onTap: _focusNode.hasFocus ? null : setCardActive,
+          onLongPress: setFocusEdit,
           child: AbsorbPointer(
+            absorbing: !_focusNode.hasFocus,
             child: TextField(
                 cursorColor: Colors.white10,
-                focusNode: focusNode,
+                focusNode: _focusNode,
                 controller: _controller,
-                style: const TextStyle(decoration: TextDecoration.none),
+                style: const TextStyle(
+                    fontSize: 18, decoration: TextDecoration.none),
                 decoration: const InputDecoration(
                     border: InputBorder.none,
                     focusedBorder: UnderlineInputBorder(
@@ -80,7 +87,7 @@ class _Card extends State<Card> {
                         borderSide: BorderSide(color: Colors.white, width: 1)),
                     isDense: true,
                     contentPadding:
-                        EdgeInsets.symmetric(vertical: 8, horizontal: 2))),
+                        EdgeInsets.symmetric(vertical: 6, horizontal: 2))),
           ),
         ));
   }
@@ -101,11 +108,11 @@ class _NewCard extends State<NewCard> {
   void initState() {
     super.initState();
     focusNode.addListener(() {
-      var slidelist = SlideList.of(context);
+      var slidelist = context.read<SlideListModel>();
       var name = _controller.text;
       if (!focusNode.hasFocus) {
         if (name.replaceAll(RegExp(r'\s'), "").isNotEmpty) {
-          slidelist.insertCard(name);
+          slidelist.addCard(name);
         }
       }
     });

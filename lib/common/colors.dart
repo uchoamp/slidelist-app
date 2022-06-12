@@ -9,4 +9,5 @@ class SlideListColors {
   static Color ok = const Color(0xFF1968D4);
   static Color okList = const Color(0xFF11468F);
   static Color shadow = const Color(0x45000000);
+  static Color itemBackground = const Color(0xFF222831);
 }
