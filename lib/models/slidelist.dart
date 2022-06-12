@@ -126,8 +126,14 @@ class SlideListModel extends ChangeNotifier {
   }
 
   void addItem(String value) {
-    if (activeCard.items.any((i) => i.value == value)) return;
+    var item = activeCard.items.firstWhereOrNull((i) => i.value == value);
+    if (item != null) {
+      item.confirmed = false;
+      notifyListeners();
+      return;
+    }
     activeCard.items.add(ItemModel(value, false));
+    notifyListeners();
   }
 
   void notifyOnDimissed() {

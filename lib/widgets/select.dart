@@ -94,7 +94,7 @@ class _Select extends State<Select> {
                           vertical: 2, horizontal: 2),
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
-                      children: [...cards, const NewCard()]);
+                      children: [...cards, const NewCardWidget()]);
                 })),
           ));
     });

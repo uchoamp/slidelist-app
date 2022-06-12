@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:slidelist_app/models/slidelist.dart';
+import 'package:slidelist_app/widgets/item.dart';
 
 class ItemList extends StatefulWidget {
   const ItemList({Key? key}) : super(key: key);
@@ -21,7 +22,9 @@ class _ItemList extends State<ItemList> {
         return ListView(
           key: UniqueKey(), // Dimissible not works correctly without this
           padding: const EdgeInsets.only(top: 8, bottom: 8),
-          children: slidelist.currentItems,
+          children: slidelist.activeCard.confirmed
+              ? slidelist.currentItems
+              : [...slidelist.currentItems, const NewItemWidget()],
         );
       },
     );

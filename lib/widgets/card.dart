@@ -69,6 +69,7 @@ class _CardWidget extends State<CardWidget> {
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
         width: double.infinity,
         child: InkWell(
+          focusColor: Colors.transparent,
           highlightColor: Colors.transparent,
           onTap: _focusNode.hasFocus ? null : setCardActive,
           onLongPress: setFocusEdit,
@@ -93,14 +94,14 @@ class _CardWidget extends State<CardWidget> {
   }
 }
 
-class NewCard extends StatefulWidget {
-  const NewCard({Key? key}) : super(key: key);
+class NewCardWidget extends StatefulWidget {
+  const NewCardWidget({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _NewCard();
+  State<StatefulWidget> createState() => _NewCardWidget();
 }
 
-class _NewCard extends State<NewCard> {
+class _NewCardWidget extends State<NewCardWidget> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode focusNode = FocusNode();
 
