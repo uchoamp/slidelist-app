@@ -1,27 +1,34 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:slidelist_app/models/card.dart';
-import 'package:slidelist_app/models/item.dart';
+import 'package:slidelist_app/data/database.dart';
 import 'package:slidelist_app/widgets/appbar.dart';
 import 'package:slidelist_app/widgets/itemlist.dart';
 import 'package:slidelist_app/widgets/navbar.dart';
 import 'common/colors.dart';
 import 'models/slidelist.dart';
 
-void main() => runApp(const RootWidget());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  var database = SlidelistDB();
+  await database.initializeDatabase();
+  var cards = await database.loadInitialData();
+
+  var initialCardId = await database.getInitialCardId();
+  var initialCard = cards.firstWhere((c) => c.id == initialCardId);
+  var slidelist = SlideListModel(database, cards, initialCard);
+  runApp(RootWidget(
+    slidelist: slidelist,
+  ));
+}
 
 class RootWidget extends StatelessWidget {
-  const RootWidget({Key? key}) : super(key: key);
+  final SlideListModel slidelist;
+  const RootWidget({Key? key, required this.slidelist}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    var slidelist = SlideListModel();
-    slidelist.cards.add(CardModel("Default", false, []));
-    slidelist.cards.add(CardModel("Other", false, []));
-    var card = slidelist.cards.first;
-    card.items.add(ItemModel("Teste 1", false));
-    card.items.add(ItemModel("Teste 2", false));
     return ChangeNotifierProvider(
         create: (context) => slidelist,
         child: MaterialApp(
