@@ -105,11 +105,11 @@ class SlideListModel extends ChangeNotifier {
 
   void setDragConfirmed(DragEndDetails details) {
     if (activeCard.confirmed && details.velocity.pixelsPerSecond.dx > 0) {
-      setConfirmed();
+      setNotConfirmed();
     } else if (!activeCard.confirmed &&
         details.velocity.pixelsPerSecond.dx < 0 &&
         hasItemConfirmed) {
-      setNotConfirmed();
+      setConfirmed();
     }
   }
 
