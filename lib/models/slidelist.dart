@@ -62,6 +62,7 @@ class SlideListModel extends ChangeNotifier {
     if (cardSameName != null) {
       if (cardSameName == activeCard || card == activeCard) _activeCard = card;
       cards.remove(cardSameName);
+      database.deleteCard(cardSameName);
       for (var item in cardSameName.items) {
         if (!card.items.any((i) => i.value == item.value)) {
           item.cardId = card.id;
